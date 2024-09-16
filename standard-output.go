@@ -11,7 +11,7 @@ import (
 
 func NewStandardOutput(file *os.File) OutputWriter {
 	var writer = StandardWriter{
-		ColorsEnabled: term.IsTerminal(int(file.Fd())),
+		ColorsEnabled: true,
 		Target:        file,
 	}
 
