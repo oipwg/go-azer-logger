@@ -3,7 +3,6 @@ package logger
 import (
 	"encoding/json"
 	"fmt"
-	"golang.org/x/term"
 	"os"
 	"strings"
 	"time"
