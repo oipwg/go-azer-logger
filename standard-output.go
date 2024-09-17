@@ -9,7 +9,7 @@ import (
 )
 
 func NewStandardOutput(file *os.File) OutputWriter {
-	var writer = StandardWriter{
+	var writer = &StandardWriter{
 		ColorsEnabled: true,
 		Target:        file,
 	}

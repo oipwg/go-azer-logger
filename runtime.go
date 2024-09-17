@@ -13,7 +13,7 @@ var (
         Timer: true,
         Error: true,
     }
-    // Add a variable to hold the log file pointer
+    // Variable to hold the log file pointer
     logFile *os.File
 )
 
