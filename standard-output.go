@@ -1,7 +1,6 @@
 package logger
 
 import (
-	"encoding/json"
 	"fmt"
 	"os"
 	"strings"
@@ -121,7 +120,7 @@ func (sw *StandardWriter) getColorFor(packageName string) string {
         return ""
     }
     // Existing color selection logic
-    return colorFor(string);
+    return colorFor(packageName)
 }
 
 func (sw *StandardWriter) resetCode() string {
