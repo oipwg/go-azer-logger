@@ -64,63 +64,71 @@ func (sw *StandardWriter) LoggerSettings(p string) *OutputSettings {
 
 	return muted
 }
-
 func (sw *StandardWriter) Format(log *Log) string {
-	if sw.ColorsEnabled {
-		return sw.PrettyFormat(log)
-	} else {
-		return sw.JSONFormat(log)
-	}
-}
-
-func (sw *StandardWriter) JSONFormat(log *Log) string {
-	str, err := json.Marshal(log)
-	if err != nil {
-		return fmt.Sprintf(`{ "logger-error": "%v" }`, err)
-	}
-
-	return string(str)
+    return sw.PrettyFormat(log)
 }
 
 func (sw *StandardWriter) PrettyFormat(log *Log) string {
-	return fmt.Sprintf("%s %s %s%s",
-		time.Now().Format("15:04:05.000"),
-		sw.PrettyLabel(log),
-		log.Message,
-		sw.PrettyAttrs(log.Attrs))
-}
-
-func (sw *StandardWriter) PrettyAttrs(attrs *Attrs) string {
-	if attrs == nil {
-		return ""
-	}
-
-	result := ""
-	for key, val := range *attrs {
-		result = fmt.Sprintf("%s %s=%v", result, key, val)
-	}
-
-	return result
+    return fmt.Sprintf("%s %s %s%s",
+        time.Now().Format("15:04:05.000"),
+        sw.PrettyLabel(log),
+        log.Message,
+        sw.PrettyAttrs(log.Attrs))
 }
 
 func (sw *StandardWriter) PrettyLabel(log *Log) string {
-	return fmt.Sprintf("%s%s%s:%s",
-		colorFor(log.Package),
-		log.Package,
-		sw.PrettyLabelExt(log),
-		reset)
+    label := log.Package + sw.PrettyLabelExt(log) + ":"
+    if sw.ColorsEnabled {
+        return fmt.Sprintf("%s%s%s", sw.getColorFor(log.Package), label, sw.resetCode())
+    }
+    return label
 }
 
 func (sw *StandardWriter) PrettyLabelExt(log *Log) string {
-	if log.Level == "ERROR" {
-		return fmt.Sprintf("(%s!%s)", red, colorFor(log.Package))
-	}
+    if log.Level == "ERROR" {
+        if sw.ColorsEnabled {
+            return fmt.Sprintf("(%s!%s)", red, sw.resetCode())
+        }
+        return "(ERROR)"
+    }
 
-	if log.Level == "TIMER" {
-		return fmt.Sprintf("(%s%s%s)", reset, fmt.Sprintf("%v", time.Duration(log.ElapsedNano)), colorFor(log.Package))
-	}
+    if log.Level == "TIMER" {
+        elapsed := fmt.Sprintf("%v", time.Duration(log.ElapsedNano))
+        if sw.ColorsEnabled {
+            return fmt.Sprintf("(%s%s%s)", sw.resetCode(), elapsed, sw.getColorFor(log.Package))
+        }
+        return fmt.Sprintf("(%s)", elapsed)
+    }
 
-	return ""
+    return ""
+}
+
+func (sw *StandardWriter) PrettyAttrs(attrs *Attrs) string {
+    if attrs == nil {
+        return ""
+    }
+
+    result := ""
+    for key, val := range *attrs {
+        result = fmt.Sprintf("%s %s=%v", result, key, val)
+    }
+
+    return result
+}
+
+func (sw *StandardWriter) getColorFor(packageName string) string {
+    if !sw.ColorsEnabled {
+        return ""
+    }
+    // Existing color selection logic
+    return colorFor(string);
+}
+
+func (sw *StandardWriter) resetCode() string {
+    if sw.ColorsEnabled {
+        return reset
+    }
+    return ""
 }
 
 // Accepts: foo,bar,qux@timer
